@@ -1,22 +1,43 @@
 package de.submit_ev.vendingapp;
 
+import android.location.Location;
+import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import de.submit_ev.vendingapp.controller.MapsActivityController;
+import de.submit_ev.vendingapp.helper.GpsHelper;
+import de.submit_ev.vendingapp.helper.VendorList;
+import de.submit_ev.vendingapp.models.Vendor;
 
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private MapsActivityController controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        ButterKnife.inject(this);
         setUpMapIfNeeded();
+        controller = new MapsActivityController(this);
     }
 
     @Override
@@ -60,6 +81,24 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    LatLngBounds generateBoundsFromList(List<Vendor> vendors) {
+        double maxLat = Double.MIN_VALUE;
+        double maxLng = Double.MIN_VALUE;
+        double minLat = Double.MAX_VALUE;
+        double minLng = Double.MAX_VALUE;
+        for (Vendor vendor : vendors) {
+            maxLat = Math.max(maxLat, vendor.getLatitude());
+            maxLng = Math.max(maxLng, vendor.getLongitude());
+            minLat = Math.min(minLat, vendor.getLatitude());
+            minLng = Math.min(minLng, vendor.getLongitude());
+        }
+        LatLngBounds output = new LatLngBounds(new LatLng(minLat, minLng), new LatLng(maxLat, maxLng));
+        return output;
+    }
+
+    public GoogleMap getMap() {
+        return mMap;
     }
 }
