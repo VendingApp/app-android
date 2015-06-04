@@ -23,7 +23,6 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.submit_ev.vendingapp.controller.MapsActivityController;
 import de.submit_ev.vendingapp.helper.GpsHelper;
-import de.submit_ev.vendingapp.helper.VendorList;
 import de.submit_ev.vendingapp.models.Vendor;
 
 public class MapsActivity extends FragmentActivity {
