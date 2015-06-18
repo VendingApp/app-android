@@ -2,4 +2,7 @@
     <string name="app_name">VendingApp</string>
     <string name="title_activity_maps">Map</string>
     <string name="button_got_to_ovgu">Go to OvGU</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

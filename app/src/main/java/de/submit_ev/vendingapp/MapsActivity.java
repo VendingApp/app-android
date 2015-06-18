@@ -8,9 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -23,6 +25,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.submit_ev.vendingapp.controller.MapsActivityController;
 import de.submit_ev.vendingapp.helper.GpsHelper;
+import de.submit_ev.vendingapp.helper.Preferences;
 import de.submit_ev.vendingapp.models.Vendor;
 
 public class MapsActivity extends FragmentActivity {
@@ -43,6 +46,36 @@ public class MapsActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        restoreMapCoordinates();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveMapCoordinates();
+    }
+
+    void saveMapCoordinates() {
+        CameraPosition position = mMap.getCameraPosition();
+        Preferences preferenceHelper = new Preferences(this);
+        preferenceHelper.getEditor()
+                .putFloat("map.longitude", (float) position.target.longitude)
+                .putFloat("map.latitude", (float) position.target.latitude)
+                .putFloat("map.zoom", position.zoom)
+                .putFloat("map.bearing", position.bearing)
+                .putFloat("map.tilt", position.tilt).commit();
+    }
+
+    void restoreMapCoordinates() {
+        Preferences preferenceHelper = new Preferences(this);
+        LatLng coordinates = new LatLng(preferenceHelper.getSharedPreferences().getFloat("map.latitude", 0),
+                preferenceHelper.getSharedPreferences().getFloat("map.longitude", 0));
+        float bearing = preferenceHelper.getSharedPreferences().getFloat("map.bearing", 0);
+        float zoom = preferenceHelper.getSharedPreferences().getFloat("map.zoom", 0);
+        float tilt = preferenceHelper.getSharedPreferences().getFloat("map.tilt", 0);
+
+        CameraPosition position = new CameraPosition(coordinates, zoom, tilt, bearing);
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
     }
 
     /**
