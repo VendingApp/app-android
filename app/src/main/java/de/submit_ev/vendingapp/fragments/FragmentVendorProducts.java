@@ -3,10 +3,14 @@ package de.submit_ev.vendingapp.fragments;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import de.submit_ev.vendingapp.R;
 
 
@@ -24,6 +28,9 @@ public class FragmentVendorProducts extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    @InjectView(R.id.my_recycler_view)
+    RecyclerView recyclerView;
 
 
     /**
@@ -55,13 +62,24 @@ public class FragmentVendorProducts extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_vendor_products, container, false);
+        View view = inflater.inflate(R.layout.fragment_vendor_products, container, false);
+        ButterKnife.inject(this, view);
+
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        
+
+        return view;
     }
 
 
