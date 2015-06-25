@@ -9,9 +9,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.apache.http.Header;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 import de.submit_ev.vendingapp.R;
+import de.submit_ev.vendingapp.adapters.ProductAdapter;
+import de.submit_ev.vendingapp.api.ServerApi;
+import de.submit_ev.vendingapp.events.SelectedVendorChangedEvent;
+import de.submit_ev.vendingapp.models.PriceStorageTable;
+import de.submit_ev.vendingapp.models.Vendor;
 
 
 /**
@@ -31,6 +49,8 @@ public class FragmentVendorProducts extends Fragment {
 
     @InjectView(R.id.my_recycler_view)
     RecyclerView recyclerView;
+
+    ProductAdapter productAdapter;
 
 
     /**
@@ -77,9 +97,47 @@ public class FragmentVendorProducts extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        
+        productAdapter = new ProductAdapter(getActivity().getApplicationContext());
+        recyclerView.setAdapter(productAdapter);
+
+        EventBus.getDefault().register(this);
 
         return view;
+    }
+
+    public void onEvent(SelectedVendorChangedEvent selectedVendorChangedEvent) {
+        while(productAdapter.getItemCount() > 0)
+            productAdapter.deleteEntity(0);
+
+        ServerApi.getProducts(selectedVendorChangedEvent.getVendor().getId(), new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                super.onSuccess(statusCode, headers, response);
+                Gson gson = new GsonBuilder().create();
+
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject item = response.getJSONObject(i);
+                        PriceStorageTable priceStorageTable = gson.fromJson(item.toString(), PriceStorageTable.class);
+                        productAdapter.addEntity(0, priceStorageTable);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+                if (statusCode == 0) {
+                    // No internet connection
+                } else {
+
+                }
+            }
+        });
+
     }
 
 

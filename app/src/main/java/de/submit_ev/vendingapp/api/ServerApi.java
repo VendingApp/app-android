@@ -28,4 +28,11 @@ public class ServerApi {
 
         get("vendor/getNear", params, handler);
     }
+
+    public static void getProducts(Long vendorID, AsyncHttpResponseHandler handler) {
+        RequestParams params = new RequestParams();
+        params.put("vendor", vendorID);
+
+        get("vendorstorage/get", params, handler);
+    }
 }
