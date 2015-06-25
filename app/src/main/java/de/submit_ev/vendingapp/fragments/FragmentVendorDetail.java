@@ -34,10 +34,10 @@ public class FragmentVendorDetail extends Fragment {
 
     OnFragmentInteractionListener mListener;
 
-    @InjectView(R.id.textViewVendorTypeContent)
+    @InjectView(R.id.textViewDescriptionContent)
     TextView textViewDescriptionContent;
 
-    @InjectView(R.id.textViewDescriptionContent)
+    @InjectView(R.id.textViewVendorTypeContent)
     TextView textViewVendorTypeContent;
 
     /**
