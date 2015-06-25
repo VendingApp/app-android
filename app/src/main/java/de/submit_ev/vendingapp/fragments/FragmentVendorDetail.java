@@ -116,8 +116,12 @@ public class FragmentVendorDetail extends Fragment {
     }
 
     public void onEvent(SelectedVendorChangedEvent selectedVendorChangedEvent) {
-        textViewDescriptionContent.setText(selectedVendorChangedEvent.getVendor().getDescription());
-        textViewVendorTypeContent.setText("Kondomautomat");
+        Vendor vendor = selectedVendorChangedEvent.getVendor();
+        textViewDescriptionContent.setText(vendor.getDescription());
+        if (vendor.getVendorType() != null) {
+            textViewVendorTypeContent.setText(vendor.getVendorType().getName());
+        }
+
     }
 
 }

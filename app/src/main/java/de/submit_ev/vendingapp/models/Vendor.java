@@ -12,6 +12,10 @@ public class Vendor {
     String address;
     String description;
 
+    VendorType vendorType;
+
+    VendorOperator vendorOperator;
+
     public long getId() {
         return id;
     }
@@ -54,5 +58,21 @@ public class Vendor {
     public Vendor setDescription(String description) {
         this.description = description;
         return this;
+    }
+
+    public VendorType getVendorType() {
+        return vendorType;
+    }
+
+    public void setVendorType(VendorType vendorType) {
+        this.vendorType = vendorType;
+    }
+
+    public VendorOperator getVendorOperator() {
+        return vendorOperator;
+    }
+
+    public void setVendorOperator(VendorOperator vendorOperator) {
+        this.vendorOperator = vendorOperator;
     }
 }
