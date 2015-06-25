@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -27,10 +28,14 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 import de.submit_ev.vendingapp.MapsActivity;
 import de.submit_ev.vendingapp.R;
 import de.submit_ev.vendingapp.api.ServerApi;
+import de.submit_ev.vendingapp.events.MarkerUnselectedEvent;
+import de.submit_ev.vendingapp.events.SelectedVendorChangedEvent;
 import de.submit_ev.vendingapp.helper.GpsHelper;
 import de.submit_ev.vendingapp.models.Vendor;
 
@@ -44,6 +49,9 @@ public class MapsActivityController {
     private GpsHelper gpsHelper;
     private Map<Marker, Vendor> displayedVendors;
 
+    @InjectView(R.id.sliding_layout)
+    SlidingUpPanelLayout slidingUpPanelLayout;
+
     public MapsActivityController(MapsActivity mapsActivity) {
         this.mapsActivity = mapsActivity;
 
@@ -56,6 +64,8 @@ public class MapsActivityController {
         ButterKnife.inject(this, mapsActivity);
 
         setup();
+
+        EventBus.getDefault().register(this);
     }
 
     void setup() {
@@ -73,6 +83,24 @@ public class MapsActivityController {
 
                     updateDisplayedVendors(minLat, maxLat, minLng, maxLng);
                 }
+            }
+        });
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (displayedVendors.get(marker) != null) {
+                    Vendor vendor = displayedVendors.get(marker);
+                    EventBus.getDefault().post(new SelectedVendorChangedEvent(vendor));
+                    slidingUpPanelLayout.setTouchEnabled(true);
+                }
+                return false;
+            }
+        });
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                EventBus.getDefault().post(new MarkerUnselectedEvent());
+                slidingUpPanelLayout.setTouchEnabled(false);
             }
         });
     }
@@ -129,14 +157,12 @@ public class MapsActivityController {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 super.onSuccess(statusCode, headers, response);
-                List<Vendor> output = new ArrayList<Vendor>();
                 Gson gson = new GsonBuilder().create();
 
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject item = response.getJSONObject(i);
                         Vendor vendor = gson.fromJson(item.toString(), Vendor.class);
-                        //output.add(vendor);
 
                         boolean alreadyDisplayed = false;
                         for (Marker marker : displayedVendors.keySet()) {
@@ -166,6 +192,14 @@ public class MapsActivityController {
                 }
             }
         });
+    }
+
+    public void onEvent(MarkerUnselectedEvent event) {
+        Toast.makeText(mapsActivity, "Unselected", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onEvent(SelectedVendorChangedEvent event) {
+        Toast.makeText(mapsActivity, "Selected", Toast.LENGTH_SHORT).show();
     }
 
 }

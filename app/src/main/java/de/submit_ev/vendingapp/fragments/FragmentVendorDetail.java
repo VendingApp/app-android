@@ -1,13 +1,20 @@
 package de.submit_ev.vendingapp.fragments;
 
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 import de.submit_ev.vendingapp.R;
+import de.submit_ev.vendingapp.events.SelectedVendorChangedEvent;
+import de.submit_ev.vendingapp.models.Vendor;
 
 
 /**
@@ -25,6 +32,13 @@ public class FragmentVendorDetail extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    OnFragmentInteractionListener mListener;
+
+    @InjectView(R.id.textViewVendorTypeContent)
+    TextView textViewDescriptionContent;
+
+    @InjectView(R.id.textViewDescriptionContent)
+    TextView textViewVendorTypeContent;
 
     /**
      * Use this factory method to create a new instance of
@@ -49,20 +63,61 @@ public class FragmentVendorDetail extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+//        try {
+//            mListener = (OnFragmentInteractionListener) activity;
+//        } catch (ClassCastException e) {
+//            throw new ClassCastException(activity.toString()
+//                    + " must implement OnFragmentInteractionListener");
+//        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        //EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_vendor_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_vendor_detail, container, false);
+        ButterKnife.inject(this, view);
+        return view;
     }
 
+    public interface OnFragmentInteractionListener {
+        void onDataSubmit(Vendor vendor);
+    }
+
+    public void onEvent(SelectedVendorChangedEvent selectedVendorChangedEvent) {
+        textViewDescriptionContent.setText(selectedVendorChangedEvent.getVendor().getDescription());
+        textViewVendorTypeContent.setText("Kondomautomat");
+    }
 
 }
